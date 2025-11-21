@@ -1,73 +1,38 @@
 'use client';
 
-import { useState } from 'react';
-import { PlayCircleIcon, PauseCircleIcon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
 
 const podcasts = [
   {
     id: 1,
-    title: 'The Future of Technology',
-    host: 'Alex Johnson',
-    duration: '45 min',
+    title: 'Nature Walk for Focus',
+    host: 'Calm Voices Collective',
+    duration: '12:34',
     date: 'Nov 15, 2025',
-    description: 'Exploring the latest technological advancements and their impact on society.',
-    audio: 'https://example.com/podcast1.mp3',
-    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80'
+    description: 'Guided reflections with a relaxing outdoor scene to help you reset and refocus.',
+    videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
   },
   {
     id: 2,
-    title: 'Sustainable Living',
-    host: 'Maria Garcia',
-    duration: '38 min',
+    title: 'Gentle River Reflections',
+    host: 'Riverstone Studio',
+    duration: '18:20',
     date: 'Nov 10, 2025',
-    description: 'Practical tips for living a more sustainable lifestyle in the modern world.',
-    audio: 'https://example.com/podcast2.mp3',
-    image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80'
+    description: 'Slow scenes of water and nature paired with prompts for slowing down.',
+    videoUrl: 'https://www.w3schools.com/html/movie.mp4',
   },
   {
     id: 3,
-    title: 'Mindfulness & Productivity',
-    host: 'James Wilson',
-    duration: '52 min',
+    title: 'Flower Mindfulness Session',
+    host: 'Bloom Mindful Lab',
+    duration: '21:05',
     date: 'Nov 5, 2025',
-    description: 'How mindfulness practices can significantly boost your productivity at work.',
-    audio: 'https://example.com/podcast3.mp3',
-    image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80'
+    description: 'A short mindfulness session using close-up nature visuals to calm your mind.',
+    videoUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
   },
 ];
 
 export default function Podcasts() {
-  const [currentPlaying, setCurrentPlaying] = useState<number | null>(null);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-
-  const togglePlay = (id: number, audioUrl: string) => {
-    if (currentPlaying === id) {
-      // Pause current audio
-      if (audio) {
-        audio.pause();
-        setCurrentPlaying(null);
-        setAudio(null);
-      }
-    } else {
-      // Stop any currently playing audio
-      if (audio) {
-        audio.pause();
-      }
-      
-      // Play new audio
-      const newAudio = new Audio(audioUrl);
-      newAudio.play();
-      setCurrentPlaying(id);
-      setAudio(newAudio);
-      
-      // Handle when audio ends
-      newAudio.onended = () => {
-        setCurrentPlaying(null);
-        setAudio(null);
-      };
-    }
-  };
 
   return (
     <section id="podcasts" className="py-16 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -87,34 +52,12 @@ export default function Podcasts() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <div className="relative h-48 overflow-hidden">
-                <img 
-                  src={podcast.image} 
-                  alt={podcast.title}
+              <div className="aspect-video w-full bg-black">
+                <video
                   className="w-full h-full object-cover"
-                  loading="lazy"
+                  src={podcast.videoUrl}
+                  controls
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <button
-                  onClick={() => togglePlay(podcast.id, podcast.audio)}
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
-                  aria-label={currentPlaying === podcast.id ? 'Pause' : 'Play'}
-                >
-                  {currentPlaying === podcast.id ? (
-                    <PauseCircleIcon className="h-16 w-16 text-white hover:text-blue-400 transition-colors" />
-                  ) : (
-                    <PlayCircleIcon className="h-16 w-16 text-white hover:text-blue-400 transition-colors" />
-                  )}
-                </button>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="w-full bg-gray-700 rounded-full h-1.5">
-                    <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: currentPlaying === podcast.id ? '70%' : '0%' }}></div>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-300 mt-1">
-                    <span>{currentPlaying === podcast.id ? 'Playing' : 'Not playing'}</span>
-                    <span>{podcast.duration}</span>
-                  </div>
-                </div>
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-center mb-2">

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const articles = [
   {
     id: 1,
-    title: 'The Art of Modern Web Development',
+    title: 'Web development',
     author: 'Sarah Chen',
     date: 'Nov 14, 2025',
     readTime: '8 min read',
@@ -19,25 +19,25 @@ const articles = [
   },
   {
     id: 2,
-    title: 'Sustainable Design Principles',
+    title: 'Sustainable design',
     author: 'Michael Brown',
     date: 'Nov 9, 2025',
     readTime: '6 min read',
     excerpt: 'How sustainable design is shaping the future of product development and user experience.',
     category: 'Design',
-    image: 'https://images.unsplash.com/photo-1533090161767-a6bede912b19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80',
+    image: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=2000&q=80',
     content: 'Full article content would go here...',
     tags: ['Sustainability', 'UI/UX', 'Eco-friendly']
   },
   {
     id: 3,
-    title: 'The Future of Remote Work',
+    title: 'Remote work',
     author: 'Emily Wilson',
     date: 'Nov 4, 2025',
     readTime: '10 min read',
     excerpt: 'Analyzing how remote work is transforming company cultures and productivity metrics.',
     category: 'Business',
-    image: 'https://images.unsplash.com/photo-1522071820081-009c01201c9e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80',
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=2000&q=80',
     content: 'Full article content would go here...',
     tags: ['Remote Work', 'Productivity', 'Company Culture']
   },
@@ -45,9 +45,39 @@ const articles = [
 
 export default function Articles() {
   const [expandedArticle, setExpandedArticle] = useState<number | null>(null);
+  const [detailsById, setDetailsById] = useState<Record<number, { extract: string; url: string | null } | null>>({});
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [errorById, setErrorById] = useState<Record<number, string | null>>({});
 
   const toggleExpand = (id: number) => {
     setExpandedArticle(expandedArticle === id ? null : id);
+  };
+
+  const fetchDetails = async (id: number, title: string) => {
+    try {
+      setLoadingId(id);
+      setErrorById((prev) => ({ ...prev, [id]: null }));
+
+      const res = await fetch(`/api/article-details?query=${encodeURIComponent(title)}`);
+
+      if (!res.ok) {
+        throw new Error('No details found');
+      }
+
+      const data = await res.json();
+
+      setDetailsById((prev) => ({
+        ...prev,
+        [id]: {
+          extract: data.extract,
+          url: data.url,
+        },
+      }));
+    } catch (error) {
+      setErrorById((prev) => ({ ...prev, [id]: 'Could not load more details.' }));
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -111,7 +141,7 @@ export default function Articles() {
                   {expandedArticle === article.id && (
                     <div className="mb-4">
                       <h4 className="font-medium text-gray-700 dark:text-gray-200 mb-2">Tags:</h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 mb-3">
                         {article.tags.map((tag, index) => (
                           <span 
                             key={index}
@@ -120,6 +150,38 @@ export default function Articles() {
                             {tag}
                           </span>
                         ))}
+                      </div>
+
+                      <div className="mt-2">
+                        <button
+                          onClick={() => fetchDetails(article.id, article.title)}
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                          disabled={loadingId === article.id}
+                        >
+                          {loadingId === article.id ? 'Loading details...' : 'See more details'}
+                        </button>
+
+                        {errorById[article.id] && (
+                          <p className="mt-2 text-sm text-red-500">
+                            {errorById[article.id]}
+                          </p>
+                        )}
+
+                        {detailsById[article.id] && (
+                          <div className="mt-3 text-sm text-gray-700 dark:text-gray-200">
+                            <p className="mb-2">{detailsById[article.id]?.extract}</p>
+                            {detailsById[article.id]?.url && (
+                              <a
+                                href={detailsById[article.id]!.url as string}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                              >
+                                Read full article on Wikipedia
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -138,7 +200,7 @@ export default function Articles() {
                     </div>
                     <button 
                       onClick={() => toggleExpand(article.id)}
-                      className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                      className="flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                     >
                       {expandedArticle === article.id ? 'Read Less' : 'Read More'}
                       <ArrowRight className="h-4 w-4 ml-1" />
